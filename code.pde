@@ -1,213 +1,316 @@
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Random;
 
-//these are variables you should probably leave alone
-int index = 0; //starts at zero-ith trial
-float border = 0; //some padding from the sides of window, set later
-int trialCount = 10; //WILL BE MODIFIED FOR THE BAKEOFF
- //this will be set higher for the bakeoff
-int trialIndex = 0; //what trial are we on
-int errorCount = 0;  //used to keep track of errors
-float errorPenalty = 1.0f; //for every error, add this value to mean time
-int startTime = 0; // time starts when the first click is captured
-int finishTime = 0; //records the time of the final click
-boolean userDone = false; //is the user done
+String[] phrases; //contains all of the phrases
+int totalTrialNum = 2; //the total number of phrases to be tested - set this low for testing. Might be ~10 for the real bakeoff!
+int currTrialNum = 0; // the current trial number (indexes into trials array above)
+float startTime = 0; // time starts when the first letter is entered
+float finishTime = 0; // records the time of when the final trial ends
+float lastTime = 0; //the timestamp of when the last trial was completed
+float lettersEnteredTotal = 0; //a running total of the number of letters the user has entered (need this for final WPM computation)
+float lettersExpectedTotal = 0; //a running total of the number of letters expected (correct phrases)
+float errorsTotal = 0; //a running total of the number of errors (when hitting next)
+String currentPhrase = ""; //the current target phrase
+String currentTyped = ""; //what the user has typed so far
+final int DPIofYourDeviceScreen = 200; //you will need to look up the DPI or PPI of your device to make sure you get the right scale!!
+//http://en.wikipedia.org/wiki/List_of_displays_by_pixel_density
+final float sizeOfInputArea = DPIofYourDeviceScreen*1; //aka, 1.0 inches square!
+PImage watch;
 
-final int screenPPI = 72; //what is the DPI of the screen you are using
-//you can test this by drawing a 72x72 pixel rectangle in code, and then confirming with a ruler it is 1x1 inch. 
+String[] firstRow = {"a", "b", "c", "d", "e", "f", "g"};
+String[] secondRow = {"h", "i", "j", "k", "l", "m", "n"};
+String[] thirdRow = {"o", "p", "q", "r", "s", "t", "u"};
+String[] fourthRow = {"v", "w", "x", "y", "z"};
+String[] fifthRow = {"Space", "back"};
 
-//These variables are for my example design. Your input code should modify/replace these!
-float logoX = 500;
-float logoY = 500;
-float logoZ = 50f;
-float logoRotation = 0;
+//Variables for my silly implementation. You can delete this:
+char currentLetter = 'a';
 
-private class Destination
+//You can modify anything in here. This is just a basic implementation.
+void setup()
 {
-  float x = 0;
-  float y = 0;
-  float rotation = 0;
-  float z = 0;
+  watch = loadImage("watchhand3smaller.png");
+  phrases = loadStrings("phrases2.txt"); //load the phrase set into memory
+  Collections.shuffle(Arrays.asList(phrases), new Random()); //randomize the order of the phrases with no seed
+  //Collections.shuffle(Arrays.asList(phrases), new Random(100)); //randomize the order of the phrases with seed 100; same order every time, useful for testing
+ 
+  orientation(LANDSCAPE); //can also be PORTRAIT - sets orientation on android device
+  size(800, 800); //Sets the size of the app. You should modify this to your device's native size. Many phones today are 1080 wide by 1920 tall.
+  textFont(createFont("Arial", 24)); //set the font to arial 24. Creating fonts is expensive, so make difference sizes once in setup, not draw
+  noStroke(); //my code doesn't use any strokes
 }
 
-ArrayList<Destination> destinations = new ArrayList<Destination>();
+//You can modify anything in here. This is just a basic implementation.
+void draw()
+{
+  background(255); //clear background
+  drawWatch(); //draw watch background
+  fill(100);
+  rect(width/2-sizeOfInputArea/2, height/2-sizeOfInputArea/2, sizeOfInputArea, sizeOfInputArea); //input area should be 1" by 1"
 
-void setup() {
-  size(1000, 800);  
-  rectMode(CENTER);
-  textFont(createFont("Arial", inchToPix(.3f))); //sets the font to Arial that is 0.3" tall
-  textAlign(CENTER);
-  rectMode(CENTER); //draw rectangles not from upper left, but from the center outwards
-  
-  //don't change this! 
-  border = inchToPix(2f); //padding of 1.0 inches
-
-  println("creating "+trialCount + " targets");
-  for (int i=0; i<trialCount; i++) //don't change this! 
+  if (finishTime!=0)
   {
-    Destination d = new Destination();
-    d.x = random(border, width-border); //set a random x with some padding
-    d.y = random(border, height-border); //set a random y with some padding
-    d.rotation = random(0, 360); //random rotation between 0 and 360
-    int j = (int)random(20);
-    d.z = ((j%12)+1)*inchToPix(.25f); //increasing size from .25 up to 3.0" 
-    destinations.add(d);
-    println("created target with " + d.x + "," + d.y + "," + d.rotation + "," + d.z);
-  }
-
-  Collections.shuffle(destinations); // randomize the order of the button; don't change this.
-}
-
-
-
-void draw() {
-
-  background(40); //background is dark grey
-  fill(200);
-  noStroke();
-  
-  //Test square in the top left corner. Should be 1 x 1 inch
-  //rect(inchToPix(0.5), inchToPix(0.5), inchToPix(1), inchToPix(1));
-
-  //shouldn't really modify this printout code unless there is a really good reason to
-  if (userDone)
-  {
-    text("User completed " + trialCount + " trials", width/2, inchToPix(.4f));
-    text("User had " + errorCount + " error(s)", width/2, inchToPix(.4f)*2);
-    text("User took " + (finishTime-startTime)/1000f/trialCount + " sec per destination", width/2, inchToPix(.4f)*3);
-    text("User took " + ((finishTime-startTime)/1000f/trialCount+(errorCount*errorPenalty)) + " sec per destination inc. penalty", width/2, inchToPix(.4f)*4);
+    fill(128);
+    textAlign(CENTER);
+    text("Finished", 280, 150);
     return;
   }
 
-  //===========DRAW DESTINATION SQUARES=================
-  for (int i=trialIndex; i<trialCount; i++) // reduces over time
+  if (startTime==0 & !mousePressed)
   {
-    pushMatrix();
-    Destination d = destinations.get(i); //get destination trial
-    translate(d.x, d.y); //center the drawing coordinates to the center of the destination trial
-    
-    rotate(radians(d.rotation)); //rotate around the origin of the Ddestination trial
-    noFill();
-    strokeWeight(3f);
-    if (trialIndex==i)
-      stroke(255, 0, 0, 192); //set color to semi translucent
-    else
-      stroke(128, 128, 128, 128); //set color to semi translucent
-    rect(0, 0, d.z, d.z);
-    popMatrix();
+    fill(128);
+    textAlign(CENTER);
+    text("Click to start time!", 280, 150); //display this messsage until the user clicks!
   }
 
-  //===========DRAW LOGO SQUARE=================
-  pushMatrix();
-  translate(logoX, logoY); //translate draw center to the center oft he logo square
-  rotate(radians(logoRotation)); //rotate using the logo square as the origin
-  noStroke();
-  fill(60, 60, 192, 192);
-  rect(0, 0, logoZ, logoZ);
-  popMatrix();
+  if (startTime==0 & mousePressed)
+  {
+    nextTrial(); //start the trials!
+  }
 
-  //===========DRAW EXAMPLE CONTROLS=================
-  fill(255);
-  scaffoldControlLogic(); //you are going to want to replace this!
-  text("Trial " + (trialIndex+1) + " of " +trialCount, width/2, inchToPix(.8f));
+  if (startTime!=0)
+  {
+    //feel free to change the size and position of the target/entered phrases and next button 
+    textAlign(LEFT); //align the text left
+    fill(128);
+    text("Phrase " + (currTrialNum+1) + " of " + totalTrialNum, 70, 50); //draw the trial count
+    fill(128);
+    text("Target:   " + currentPhrase, 70, 100); //draw the target string
+    text("Entered:  " + currentTyped +"|", 70, 140); //draw what the user has entered thus far 
+
+    //draw very basic next button
+    fill(255, 0, 0);
+    rect(600, 600, 200, 200); //draw next button
+    fill(255);
+    text("NEXT > ", 650, 650); //draw next label
+    
+    textSize(14);
+    drawFirstRow();
+    drawSecondRow();
+    drawThirdRow();
+    drawFourthRow();
+    drawFifthRow();
+  }
 }
 
-//my example design for control, which is terrible
-void scaffoldControlLogic()
+void drawFirstRow()
 {
-  //upper left corner, rotate counterclockwise
-  text("CCW", inchToPix(.4f), (height-inchToPix(.4f))/2);
-  if (mousePressed && dist(0, height/2, mouseX, mouseY)<inchToPix(.8f))
-    logoRotation--;
-
-  //upper right corner, rotate clockwise
-  text("CW", (width-inchToPix(.4f))/10, (height-inchToPix(.4f))/2);
-  if (mousePressed && dist((width)/10, height/2, mouseX, mouseY)<inchToPix(.8f))
-    logoRotation++;
-
-  //lower left corner, decrease Z
-  text("-", inchToPix(.4f), height-inchToPix(.4f));
-  if (mousePressed && dist(0, height, mouseX, mouseY)<inchToPix(.8f))
-    logoZ = constrain(logoZ-inchToPix(.02f), .01, inchToPix(4f)); //leave min and max alone!
-
-  //lower right corner, increase Z
-  text("+", (width-inchToPix(.4f))/10, height-inchToPix(.4f));
-  if (mousePressed && dist(width/10, height, mouseX, mouseY)<inchToPix(.8f))
-    logoZ = constrain(logoZ+inchToPix(.02f), .01, inchToPix(4f)); //leave min and max alone! 
-  //left middle, move left
-  text("left", inchToPix(.4f), (height-inchToPix(.4f))/1.5);
-  if (mousePressed && dist(0, height/1.5, mouseX, mouseY)<inchToPix(.8f))
-    logoX-=inchToPix(.02f);
-
-  text("right", (width-inchToPix(.4f))/10, (height-inchToPix(.4f))/1.5);
-  if (mousePressed && dist(width/10, height/1.5, mouseX, mouseY)<inchToPix(.8f))
-    logoX+=inchToPix(.02f);
-
-  text("up", inchToPix(.4f), (height-inchToPix(.4f))/1.2);
-  if (mousePressed && dist(0, height/1.22, mouseX, mouseY)<inchToPix(.8f))
-    logoY-=inchToPix(.02f);
-
-  text("down", (width-inchToPix(.4f))/10, (height-inchToPix(.4f))/1.2);
-  if (mousePressed && dist(width/10, height/1.22, mouseX, mouseY)<inchToPix(.8f))
-    logoY+=inchToPix(.02f);
+  for (int i = 0; i < 7; i++) {
+    fill(255, 255, 255);
+    stroke(0, 0, 0);
+    rect(width/2-sizeOfInputArea/2 + i*sizeOfInputArea/10, height/2 - 50, sizeOfInputArea/10, sizeOfInputArea/10);
+    noStroke();
+    fill(0, 0, 0);
+    text(firstRow[i], width/2-sizeOfInputArea/2 + i*sizeOfInputArea/10 + 3, height/2 - 50 + sizeOfInputArea/11);    
+  }
 }
 
+void drawSecondRow()
+{
+  for (int i = 0; i < 7; i++) {
+    fill(255, 255, 255);
+    stroke(0, 0, 0);
+    rect(width/2-sizeOfInputArea/2 + i*sizeOfInputArea/10, height/2 - 50 + sizeOfInputArea/10, sizeOfInputArea/10, sizeOfInputArea/10);
+    noStroke();
+    fill(0, 0, 0);
+    text(secondRow[i], width/2-sizeOfInputArea/2 + i*sizeOfInputArea/10 + 3, height/2 - 50 + sizeOfInputArea/10 + sizeOfInputArea/11);     
+  }
+}
+
+void drawThirdRow()
+{
+  for (int i = 0; i < 7; i++) {
+    fill(255, 255, 255);
+    stroke(0, 0, 0);
+    rect(width/2-sizeOfInputArea/2 + i*sizeOfInputArea/10, height/2 - 50 + sizeOfInputArea*2/10, sizeOfInputArea/10, sizeOfInputArea/10);
+    noStroke();
+    fill(0, 0, 0);
+    text(thirdRow[i], width/2-sizeOfInputArea/2 + i*sizeOfInputArea/10 + 3, height/2 - 50 + sizeOfInputArea*2/10 + sizeOfInputArea/11);   
+  }
+}
+
+void drawFourthRow()
+{
+  for (int i = 0; i < 5; i++) {
+    fill(255, 255, 255);
+    stroke(0, 0, 0);
+    rect(width/2-sizeOfInputArea/2 + i*sizeOfInputArea/10, height/2 - 50 + sizeOfInputArea*3/10, sizeOfInputArea/10, sizeOfInputArea/10);
+    noStroke();
+    fill(0, 0, 0);
+    text(fourthRow[i], width/2-sizeOfInputArea/2 + i*sizeOfInputArea/10 + 3, height/2 - 50 + sizeOfInputArea*3/10 + sizeOfInputArea/11);       
+  }
+}
+
+void drawFifthRow()
+{
+  fill(255, 255, 255);
+  stroke(0, 0, 0);
+  rect(width/2-sizeOfInputArea/2 + 0*sizeOfInputArea/10, height/2 - 50 + sizeOfInputArea*4/10, sizeOfInputArea/10 + 35, sizeOfInputArea/10);
+  noStroke();
+  fill(0, 0, 0);
+  text(fifthRow[0], width/2-sizeOfInputArea/2 + 0*sizeOfInputArea/10 + 3, height/2 - 50 + sizeOfInputArea*4/10 + sizeOfInputArea/11);
+  fill(255, 255, 255);
+  stroke(0, 0, 0);
+  rect(width/2-sizeOfInputArea/2 + 1*sizeOfInputArea/10 + 35, height/2 - 50 + sizeOfInputArea*4/10, sizeOfInputArea/10 + 35, sizeOfInputArea/10);
+  noStroke();
+  fill(0, 0, 0);
+  text(fifthRow[1], width/2-sizeOfInputArea/2 + 1*sizeOfInputArea/10 + 3 + 35, height/2 - 50 + sizeOfInputArea*4/10 + sizeOfInputArea/11); 
+
+}
+
+
+
+//my terrible implementation you can entirely replace
+boolean didMouseClick(float x, float y, float w, float h) //simple function to do hit testing
+{
+  return (mouseX > x && mouseX<x+w && mouseY>y && mouseY<y+h); //check to see if it is in button bounds
+}
+
+//my terrible implementation you can entirely replace
 void mousePressed()
 {
-  if (startTime == 0) //start time on the instant of the first user click
+  
+  // Press the first row
+  if (didMouseClick(width/2-sizeOfInputArea/2, height/2 - 50, sizeOfInputArea, sizeOfInputArea/10))
   {
-    startTime = millis();
-    println("time started!");
+    int i = int ((mouseX - (width/2 - sizeOfInputArea/2)) / (sizeOfInputArea/10));
+    currentTyped += firstRow[i];
+  }
+  
+  // Press the second row
+  if (didMouseClick(width/2-sizeOfInputArea/2, height/2 - 50 + sizeOfInputArea/10, sizeOfInputArea - sizeOfInputArea/10, sizeOfInputArea/10))
+  {
+    int i = int ((mouseX - (width/2 - sizeOfInputArea/2)) / (sizeOfInputArea/10));
+    currentTyped += secondRow[i];
+  }
+  
+  // Press the third row
+  if (didMouseClick(width/2-sizeOfInputArea/2, height/2 - 50 + sizeOfInputArea*2/10, sizeOfInputArea - sizeOfInputArea/10, sizeOfInputArea/10))
+  {
+    int i = int ((mouseX - (width/2 - sizeOfInputArea/2)) / (sizeOfInputArea/10));
+    currentTyped += thirdRow[i];
+  }
+  
+  // Press the fourth row
+  if (didMouseClick(width/2-sizeOfInputArea/2, height/2 - 50 + sizeOfInputArea*3/10, sizeOfInputArea - sizeOfInputArea/10, sizeOfInputArea/10))
+  {
+    int i = int ((mouseX - (width/2 - sizeOfInputArea/2)) / (sizeOfInputArea/10));
+    currentTyped += fourthRow[i];
+  }
+  
+  // Press the fifth row
+  if (didMouseClick(width/2-sizeOfInputArea/2, height/2 - 50 + sizeOfInputArea*4/10, sizeOfInputArea - sizeOfInputArea/10, sizeOfInputArea/10))
+  {
+    int i = int ((mouseX - (width/2 - sizeOfInputArea/2)) / (sizeOfInputArea/10 + 35));
+    String curLetter =  fifthRow[i];
+    
+    if (curLetter == "Space")
+      currentTyped+=" ";
+    else 
+      if (currentTyped.length()>0)
+        currentTyped = currentTyped.substring(0, currentTyped.length()-1);
+  }
+ 
+
+  //You are allowed to have a next button outside the 1" area
+  if (didMouseClick(600, 600, 200, 200)) //check if click is in next button
+  {
+    nextTrial(); //if so, advance to next trial
   }
 }
 
-void mouseReleased()
+
+void nextTrial()
 {
-  //check to see if user clicked middle of screen within 3 inches, which this code uses as a submit button
-  if (dist(width/2, height/2, mouseX, mouseY)<inchToPix(3f))
+  if (currTrialNum >= totalTrialNum) //check to see if experiment is done
+    return; //if so, just return
+
+  if (startTime!=0 && finishTime==0) //in the middle of trials
   {
-    if (userDone==false && !checkForSuccess())
-      errorCount++;
-
-    trialIndex++; //and move on to next trial
-
-    if (trialIndex==trialCount && userDone==false)
-    {
-      userDone = true;
-      finishTime = millis();
-    }
+    System.out.println("==================");
+    System.out.println("Phrase " + (currTrialNum+1) + " of " + totalTrialNum); //output
+    System.out.println("Target phrase: " + currentPhrase); //output
+    System.out.println("Phrase length: " + currentPhrase.length()); //output
+    System.out.println("User typed: " + currentTyped); //output
+    System.out.println("User typed length: " + currentTyped.length()); //output
+    System.out.println("Number of errors: " + computeLevenshteinDistance(currentTyped.trim(), currentPhrase.trim())); //trim whitespace and compute errors
+    System.out.println("Time taken on this trial: " + (millis()-lastTime)); //output
+    System.out.println("Time taken since beginning: " + (millis()-startTime)); //output
+    System.out.println("==================");
+    lettersExpectedTotal+=currentPhrase.trim().length();
+    lettersEnteredTotal+=currentTyped.trim().length();
+    errorsTotal+=computeLevenshteinDistance(currentTyped.trim(), currentPhrase.trim());
   }
-}
 
-//probably shouldn't modify this, but email me if you want to for some good reason.
-public boolean checkForSuccess()
-{
-  Destination d = destinations.get(trialIndex);	
-  boolean closeDist = dist(d.x, d.y, logoX, logoY)<inchToPix(.05f); //has to be within +-0.05"
-  boolean closeRotation = calculateDifferenceBetweenAngles(d.rotation, logoRotation)<=5;
-  boolean closeZ = abs(d.z - logoZ)<inchToPix(.1f); //has to be within +-0.1"	
+  //probably shouldn't need to modify any of this output / penalty code.
+  if (currTrialNum == totalTrialNum-1) //check to see if experiment just finished
+  {
+    finishTime = millis();
+    System.out.println("==================");
+    System.out.println("Trials complete!"); //output
+    System.out.println("Total time taken: " + (finishTime - startTime)); //output
+    System.out.println("Total letters entered: " + lettersEnteredTotal); //output
+    System.out.println("Total letters expected: " + lettersExpectedTotal); //output
+    System.out.println("Total errors entered: " + errorsTotal); //output
 
-  println("Close Enough Distance: " + closeDist + " (logo X/Y = " + d.x + "/" + d.y + ", destination X/Y = " + logoX + "/" + logoY +")");
-  println("Close Enough Rotation: " + closeRotation + " (rot dist="+calculateDifferenceBetweenAngles(d.rotation, logoRotation)+")");
-  println("Close Enough Z: " +  closeZ + " (logo Z = " + d.z + ", destination Z = " + logoZ +")");
-  println("Close enough all: " + (closeDist && closeRotation && closeZ));
+    float wpm = (lettersEnteredTotal/5.0f)/((finishTime - startTime)/60000f); //FYI - 60K is number of milliseconds in minute
+    float freebieErrors = lettersExpectedTotal*.05; //no penalty if errors are under 5% of chars
+    float penalty = max(errorsTotal-freebieErrors, 0) * .5f;
+    
+    System.out.println("Raw WPM: " + wpm); //output
+    System.out.println("Freebie errors: " + freebieErrors); //output
+    System.out.println("Penalty: " + penalty);
+    System.out.println("WPM w/ penalty: " + (wpm-penalty)); //yes, minus, becuase higher WPM is better
+    System.out.println("==================");
 
-  return closeDist && closeRotation && closeZ;
-}
+    currTrialNum++; //increment by one so this mesage only appears once when all trials are done
+    return;
+  }
 
-//utility function I include to calc diference between two angles
-double calculateDifferenceBetweenAngles(float a1, float a2)
-{
-  double diff=abs(a1-a2);
-  diff%=90;
-  if (diff>45)
-    return 90-diff;
+  if (startTime==0) //first trial starting now
+  {
+    System.out.println("Trials beginning! Starting timer..."); //output we're done
+    startTime = millis(); //start the timer!
+  } 
   else
-    return diff;
+    currTrialNum++; //increment trial number
+
+  lastTime = millis(); //record the time of when this trial ended
+  currentTyped = ""; //clear what is currently typed preparing for next trial
+  currentPhrase = phrases[currTrialNum]; // load the next phrase!
+  //currentPhrase = "abc"; // uncomment this to override the test phrase (useful for debugging)
 }
 
-//utility function to convert inches into pixels based on screen PPI
-float inchToPix(float inch)
+
+void drawWatch()
 {
-  return inch*screenPPI;
+  float watchscale = DPIofYourDeviceScreen/138.0;
+  pushMatrix();
+  translate(width/2, height/2);
+  scale(watchscale);
+  imageMode(CENTER);
+  image(watch, 0, 0);
+  popMatrix();
+}
+
+
+
+
+
+//=========SHOULD NOT NEED TO TOUCH THIS METHOD AT ALL!==============
+int computeLevenshteinDistance(String phrase1, String phrase2) //this computers error between two strings
+{
+  int[][] distance = new int[phrase1.length() + 1][phrase2.length() + 1];
+
+  for (int i = 0; i <= phrase1.length(); i++)
+    distance[i][0] = i;
+  for (int j = 1; j <= phrase2.length(); j++)
+    distance[0][j] = j;
+
+  for (int i = 1; i <= phrase1.length(); i++)
+    for (int j = 1; j <= phrase2.length(); j++)
+      distance[i][j] = min(min(distance[i - 1][j] + 1, distance[i][j - 1] + 1), distance[i - 1][j - 1] + ((phrase1.charAt(i - 1) == phrase2.charAt(j - 1)) ? 0 : 1));
+
+  return distance[phrase1.length()][phrase2.length()];
 }
