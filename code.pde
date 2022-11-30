@@ -18,6 +18,14 @@ final int DPIofYourDeviceScreen = 200; //you will need to look up the DPI or PPI
 final float sizeOfInputArea = DPIofYourDeviceScreen*1; //aka, 1.0 inches square!
 PImage watch;
 
+String[] firstStopRow = {"the", "of", "and", "a", "to"};
+String[] secondStopRow = {"in", "is", "you", "that", "it"};
+String[] firstRow = {"a", "b", "c", "d", "e", "f", "g"};
+String[] secondRow = {"h", "i", "j", "k", "l", "m", "n"};
+String[] thirdRow = {"o", "p", "q", "r", "s", "t", "u"};
+String[] fourthRow = {"v", "w", "x", "y", "z"};
+String[] fifthRow = {"Space", "back"};
+
 //Variables for my silly implementation. You can delete this:
 char currentLetter = 'a';
 
@@ -78,17 +86,109 @@ void draw()
     rect(600, 600, 200, 200); //draw next button
     fill(255);
     text("NEXT > ", 650, 650); //draw next label
-
-    //my draw code
-    fill(255, 0, 0); //red button
-    rect(width/2-sizeOfInputArea/2, height/2-sizeOfInputArea/2+sizeOfInputArea/2, sizeOfInputArea/2, sizeOfInputArea/2); //draw left red button
-    fill(0, 255, 0); //green button
-    rect(width/2-sizeOfInputArea/2+sizeOfInputArea/2, height/2-sizeOfInputArea/2+sizeOfInputArea/2, sizeOfInputArea/2, sizeOfInputArea/2); //draw right green button
-    textAlign(CENTER);
-    fill(200);
-    text("" + currentLetter, width/2, height/2-sizeOfInputArea/4); //draw current letter
+    
+    textSize(14);
+    drawFirstStopRow();
+    drawSecondStopRow();
+    drawFirstRow();
+    drawSecondRow();
+    drawThirdRow();
+    drawFourthRow();
+    drawFifthRow();
   }
 }
+
+void drawFirstStopRow()
+{
+  for (int i = 0; i < 5; i++) {
+    fill(255, 255, 255);
+    stroke(0, 0, 0);
+    rect(width/2-sizeOfInputArea/2 + i*sizeOfInputArea/5, height/2 - 95, sizeOfInputArea/5, sizeOfInputArea/10);
+    noStroke();
+    fill(0, 0, 0);
+    text(firstStopRow[i], width/2-sizeOfInputArea/2 + i*sizeOfInputArea/5 + 5, height/2 - 95 + sizeOfInputArea/11);    
+  }
+}
+
+void drawSecondStopRow()
+{
+  for (int i = 0; i < 5; i++) {
+    fill(255, 255, 255);
+    stroke(0, 0, 0);
+    rect(width/2-sizeOfInputArea/2 + i*sizeOfInputArea/5, height/2 - 75, sizeOfInputArea/5, sizeOfInputArea/10);
+    noStroke();
+    fill(0, 0, 0);
+    text(secondStopRow[i], width/2-sizeOfInputArea/2 + i*sizeOfInputArea/5 + 5, height/2 - 75 + sizeOfInputArea/11);    
+  }
+}
+
+
+void drawFirstRow()
+{
+  for (int i = 0; i < 7; i++) {
+    fill(255, 255, 255);
+    stroke(0, 0, 0);
+    rect(width/2-sizeOfInputArea/2 + i*sizeOfInputArea/10, height/2 - 50, sizeOfInputArea/10, sizeOfInputArea/10);
+    noStroke();
+    fill(0, 0, 0);
+    text(firstRow[i], width/2-sizeOfInputArea/2 + i*sizeOfInputArea/10 + 3, height/2 - 50 + sizeOfInputArea/11);    
+  }
+}
+
+void drawSecondRow()
+{
+  for (int i = 0; i < 7; i++) {
+    fill(255, 255, 255);
+    stroke(0, 0, 0);
+    rect(width/2-sizeOfInputArea/2 + i*sizeOfInputArea/10, height/2 - 50 + sizeOfInputArea/10, sizeOfInputArea/10, sizeOfInputArea/10);
+    noStroke();
+    fill(0, 0, 0);
+    text(secondRow[i], width/2-sizeOfInputArea/2 + i*sizeOfInputArea/10 + 3, height/2 - 50 + sizeOfInputArea/10 + sizeOfInputArea/11);     
+  }
+}
+
+void drawThirdRow()
+{
+  for (int i = 0; i < 7; i++) {
+    fill(255, 255, 255);
+    stroke(0, 0, 0);
+    rect(width/2-sizeOfInputArea/2 + i*sizeOfInputArea/10, height/2 - 50 + sizeOfInputArea*2/10, sizeOfInputArea/10, sizeOfInputArea/10);
+    noStroke();
+    fill(0, 0, 0);
+    text(thirdRow[i], width/2-sizeOfInputArea/2 + i*sizeOfInputArea/10 + 3, height/2 - 50 + sizeOfInputArea*2/10 + sizeOfInputArea/11);   
+  }
+}
+
+void drawFourthRow()
+{
+  for (int i = 0; i < 5; i++) {
+    fill(255, 255, 255);
+    stroke(0, 0, 0);
+    rect(width/2-sizeOfInputArea/2 + i*sizeOfInputArea/10, height/2 - 50 + sizeOfInputArea*3/10, sizeOfInputArea/10, sizeOfInputArea/10);
+    noStroke();
+    fill(0, 0, 0);
+    text(fourthRow[i], width/2-sizeOfInputArea/2 + i*sizeOfInputArea/10 + 3, height/2 - 50 + sizeOfInputArea*3/10 + sizeOfInputArea/11);       
+  }
+}
+
+void drawFifthRow()
+{
+  fill(255, 255, 255);
+  stroke(0, 0, 0);
+  rect(width/2-sizeOfInputArea/2 + 0*sizeOfInputArea/10, height/2 - 50 + sizeOfInputArea*4/10, sizeOfInputArea/10 + 35, sizeOfInputArea/10);
+  noStroke();
+  fill(0, 0, 0);
+  text(fifthRow[0], width/2-sizeOfInputArea/2 + 0*sizeOfInputArea/10 + 3, height/2 - 50 + sizeOfInputArea*4/10 + sizeOfInputArea/11);
+  fill(255, 255, 255);
+  stroke(0, 0, 0);
+  rect(width/2-sizeOfInputArea/2 + 1*sizeOfInputArea/10 + 35, height/2 - 50 + sizeOfInputArea*4/10, sizeOfInputArea/10 + 35, sizeOfInputArea/10);
+  noStroke();
+  fill(0, 0, 0);
+  text(fifthRow[1], width/2-sizeOfInputArea/2 + 1*sizeOfInputArea/10 + 3 + 35, height/2 - 50 + sizeOfInputArea*4/10 + sizeOfInputArea/11); 
+
+}
+
+
 
 //my terrible implementation you can entirely replace
 boolean didMouseClick(float x, float y, float w, float h) //simple function to do hit testing
@@ -96,32 +196,77 @@ boolean didMouseClick(float x, float y, float w, float h) //simple function to d
   return (mouseX > x && mouseX<x+w && mouseY>y && mouseY<y+h); //check to see if it is in button bounds
 }
 
-//my terrible implementation you can entirely replace
+
+
+
 void mousePressed()
 {
-  if (didMouseClick(width/2-sizeOfInputArea/2, height/2-sizeOfInputArea/2+sizeOfInputArea/2, sizeOfInputArea/2, sizeOfInputArea/2)) //check if click in left button
+  // Press the first STOP row
+  if (didMouseClick(width/2-sizeOfInputArea/2, height/2 - 95, sizeOfInputArea, sizeOfInputArea/10))
   {
-    currentLetter --;
-    if (currentLetter<'_') //wrap around to z
-      currentLetter = 'z';
+    int i = int ((mouseX - (width/2 - sizeOfInputArea/2)) / (sizeOfInputArea/5));
+    if (i < 5) {
+      currentTyped += firstStopRow[i];
+    }    
   }
 
-  if (didMouseClick(width/2-sizeOfInputArea/2+sizeOfInputArea/2, height/2-sizeOfInputArea/2+sizeOfInputArea/2, sizeOfInputArea/2, sizeOfInputArea/2)) //check if click in right button
+  // Press the first STOP row
+  if (didMouseClick(width/2-sizeOfInputArea/2, height/2 - 75, sizeOfInputArea, sizeOfInputArea/10))
   {
-    currentLetter ++;
-    if (currentLetter>'z') //wrap back to space (aka underscore)
-      currentLetter = '_';
+    int i = int ((mouseX - (width/2 - sizeOfInputArea/2)) / (sizeOfInputArea/5));
+    if (i < 5) {
+      currentTyped += secondStopRow[i];
+    }    
+  }  
+  
+  // Press the first row
+  if (didMouseClick(width/2-sizeOfInputArea/2, height/2 - 50, sizeOfInputArea, sizeOfInputArea/10))
+  {
+    int i = int ((mouseX - (width/2 - sizeOfInputArea/2)) / (sizeOfInputArea/10));
+    if (i < 7) {
+      currentTyped += firstRow[i];
+    }
+    
   }
-
-  if (didMouseClick(width/2-sizeOfInputArea/2, height/2-sizeOfInputArea/2, sizeOfInputArea, sizeOfInputArea/2)) //check if click occured in letter area
+  
+  // Press the second row
+  if (didMouseClick(width/2-sizeOfInputArea/2, height/2 - 50 + sizeOfInputArea/10, sizeOfInputArea - sizeOfInputArea/10, sizeOfInputArea/10))
   {
-    if (currentLetter=='_') //if underscore, consider that a space bar
+    int i = int ((mouseX - (width/2 - sizeOfInputArea/2)) / (sizeOfInputArea/10));
+    if (i < 7) {
+      currentTyped += secondRow[i];
+    }    
+  }
+  
+  // Press the third row
+  if (didMouseClick(width/2-sizeOfInputArea/2, height/2 - 50 + sizeOfInputArea*2/10, sizeOfInputArea - sizeOfInputArea/10, sizeOfInputArea/10))
+  {
+    int i = int ((mouseX - (width/2 - sizeOfInputArea/2)) / (sizeOfInputArea/10));
+    if (i < 7) {
+      currentTyped += thirdRow[i];
+    }        
+  }
+  
+  // Press the fourth row
+  if (didMouseClick(width/2-sizeOfInputArea/2, height/2 - 50 + sizeOfInputArea*3/10, sizeOfInputArea - sizeOfInputArea/10, sizeOfInputArea/10))
+  {
+    int i = int ((mouseX - (width/2 - sizeOfInputArea/2)) / (sizeOfInputArea/10));
+    currentTyped += fourthRow[i];
+  }
+  
+  // Press the fifth row
+  if (didMouseClick(width/2-sizeOfInputArea/2, height/2 - 50 + sizeOfInputArea*4/10, sizeOfInputArea - sizeOfInputArea/10, sizeOfInputArea/10))
+  {
+    int i = int ((mouseX - (width/2 - sizeOfInputArea/2)) / (sizeOfInputArea/10 + 35));
+    String curLetter =  fifthRow[i];
+    
+    if (curLetter == "Space")
       currentTyped+=" ";
-    else if (currentLetter=='`' & currentTyped.length()>0) //if `, treat that as a delete command
-      currentTyped = currentTyped.substring(0, currentTyped.length()-1);
-    else if (currentLetter!='`') //if not any of the above cases, add the current letter to the typed string
-      currentTyped+=currentLetter;
+    else 
+      if (currentTyped.length()>0)
+        currentTyped = currentTyped.substring(0, currentTyped.length()-1);
   }
+ 
 
   //You are allowed to have a next button outside the 1" area
   if (didMouseClick(600, 600, 200, 200)) //check if click is in next button
