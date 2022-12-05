@@ -133,7 +133,7 @@ void drawFirstAutoRow()
     rect(width/2-sizeOfInputArea/2 + i*sizeOfInputArea/2, height/2 - 50, sizeOfInputArea/2, sizeOfInputArea/7);
     noStroke();
     fill(0, 0, 0);
-    text(topFourWords.get(i), width/2-sizeOfInputArea/2 + i*sizeOfInputArea/2, height/2 - 50 + sizeOfInputArea/8);    
+    text(topFourWords.get(i), width/2-sizeOfInputArea/2 + i*sizeOfInputArea/2 + 1, height/2 - 50 + sizeOfInputArea/8);    
   }
 }
 
@@ -145,7 +145,7 @@ void drawSecondAutoRow()
     rect(width/2-sizeOfInputArea/2 + i*sizeOfInputArea/2, height/2 - 35, sizeOfInputArea/2, sizeOfInputArea/7);
     noStroke();
     fill(0, 0, 0);
-    text(topFourWords.get(i + 2), width/2-sizeOfInputArea/2 + i*sizeOfInputArea/2, height/2 - 35 + sizeOfInputArea/8);    
+    text(topFourWords.get(i + 2), width/2-sizeOfInputArea/2 + i*sizeOfInputArea/2 + 1, height/2 - 35 + sizeOfInputArea/8);    
   }
 }
 
@@ -158,7 +158,7 @@ void drawFirstStopRow()
     rect(width/2-sizeOfInputArea/2 + i*sizeOfInputArea/5, height/2 - 50, sizeOfInputArea/5, sizeOfInputArea/7);
     noStroke();
     fill(0, 0, 0);
-    text(firstStopRow[i], width/2-sizeOfInputArea/2 + i*sizeOfInputArea/5, height/2 - 50 + sizeOfInputArea/8);    
+    text(firstStopRow[i], width/2-sizeOfInputArea/2 + i*sizeOfInputArea/5 + 1, height/2 - 50 + sizeOfInputArea/8);    
   }
 }
 
@@ -170,7 +170,7 @@ void drawSecondStopRow()
     rect(width/2-sizeOfInputArea/2 + i*sizeOfInputArea/5, height/2 - 35, sizeOfInputArea/5, sizeOfInputArea/7);
     noStroke();
     fill(0, 0, 0);
-    text(secondStopRow[i], width/2-sizeOfInputArea/2 + i*sizeOfInputArea/5, height/2 - 35 + sizeOfInputArea/8);    
+    text(secondStopRow[i], width/2-sizeOfInputArea/2 + i*sizeOfInputArea/5 + 1, height/2 - 35 + sizeOfInputArea/8);    
   }
 }
 
